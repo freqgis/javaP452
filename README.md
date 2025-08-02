@@ -10,7 +10,10 @@ The following table describes the structure of the folder `./src/` containing th
 | File/Folder               | Description                                                         |
 |----------------------------|---------------------------------------------------------------------|
 |`main/P452.java`                | Java class implementing Recommendation ITU-R P.452-17          |
+|`main/P452Analysis.java`         | Extended analysis class providing detailed component breakdown, terrain analysis, and parameter sensitivity analysis |
+|`main/P452AnalysisDemo.java`     | Demonstration program showcasing the analysis capabilities |
 |`test/P452Test.java`          | Java class implementing validation tests against the reference MATLAB/Octave implementation of this Recommendation for a range of input variables.          |
+|`test/P452AnalysisTest.java`     | Test cases for the analysis extension functionality |
 
 
 
@@ -18,6 +21,34 @@ The following table describes the structure of the folder `./src/` containing th
 
 ~~~ 
 Lb = tl_p452(f, p, d, h, zone, htg, hrg, phi_path, Gt, Gr, pol, dct, dcr, DN, N0, press, temp, ha_t, ha_r, dk_t, dk_r);
+~~~
+
+## Analysis Extension
+
+For detailed analysis of ITU-R P.452 propagation characteristics, use the `P452Analysis` class:
+
+~~~
+P452Analysis analyzer = new P452Analysis();
+
+// Comprehensive analysis with loss component breakdown
+P452Analysis.P452AnalysisResult result = analyzer.analyzeTransmissionLoss(
+    f, p, d, h, zone, htg, hrg, phi_path, Gt, Gr, pol, 
+    dct, dcr, DN, N0, press, temp, ha_t, ha_r, dk_t, dk_r
+);
+
+// Terrain profile analysis
+P452Analysis.TerrainAnalysis terrain = analyzer.analyzeTerrainProfile(d, h, htg, hrg);
+
+// Parameter sensitivity analysis
+P452Analysis.SensitivityAnalysis sensitivity = analyzer.analyzeSensitivity(
+    f, p, d, h, zone, htg, hrg, phi_path, Gt, Gr, pol, 
+    dct, dcr, DN, N0, press, temp, ha_t, ha_r, dk_t, dk_r
+);
+~~~
+
+To run the analysis demonstration:
+~~~
+java -cp out/production main.P452AnalysisDemo
 ~~~
 
 ## Required input arguments of function `tl_p452`
@@ -56,6 +87,19 @@ Note that  `d` needs to be significantly greater than `dk_t` and/or `dk_r` for t
 |------------|--------|-------|-------------|
 | `Lb`    | double | dB    | Basic transmission loss |
 
+For detailed analysis, the `P452Analysis` class provides additional outputs:
+
+| Component   | Type   | Units | Description |
+|------------|--------|-------|-------------|
+| `Lbfsg`    | double | dB    | Free-space + atmospheric gases loss |
+| `Ldp`      | double | dB    | Diffraction loss for specified time percentage |
+| `Ld50`     | double | dB    | Diffraction loss for 50% time |
+| `Lba`      | double | dB    | Anomalous propagation loss |
+| `Lbs`      | double | dB    | Troposcatter loss |
+| `Aht`      | double | dB    | Transmitter clutter loss |
+| `Ahr`      | double | dB    | Receiver clutter loss |
+| `dominantMechanism` | String | - | Description of the dominant propagation mechanism |
+
 
 ## Meteorological Data
 The following input arguments related to meteorological data:
@@ -86,6 +130,32 @@ Dgc = gcp[3];
 
 phi_path = Phimn;
 ~~~
+
+## Analysis Features
+
+The enhanced `P452Analysis` class provides comprehensive analysis capabilities for ITU-R P.452 propagation:
+
+### 1. Loss Component Analysis
+- Detailed breakdown of transmission loss components
+- Individual contribution of free-space, diffraction, anomalous propagation, troposcatter, and clutter losses
+- Identification of dominant propagation mechanism
+
+### 2. Terrain Profile Analysis
+- Terrain height statistics (min, max, average, variance)
+- Clearance profile calculation
+- Automatic terrain classification (Flat, Rolling, Hilly, Mountainous)
+
+### 3. Parameter Sensitivity Analysis
+- Frequency sensitivity (dB per GHz)
+- Height sensitivity (dB per meter)
+- Distance sensitivity (dB per km)
+- Ranking of parameter impact on transmission loss
+
+### 4. Path Characteristics
+- Line-of-sight distance calculation
+- Sea path fraction analysis
+- Effective antenna heights and horizon distances
+- Path type classification (LoS vs Trans-horizon)
 
 
 ## References
